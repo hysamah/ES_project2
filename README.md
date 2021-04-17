@@ -2,11 +2,11 @@
 
 ## Project Idea
 
-## Electronic 
+## Components 
 
 ### Microcontroller 
 
-STM32 Nucleo-32: STM32L432KC 
+STM32 Nucleo-32: STM32L432KC x2
 
 ### Car Kit
 
