@@ -49,7 +49,7 @@ STM 32 Cube programmer
 
 
 
-## Potenial enhancements 
+## Potential enhancements 
 
 ### Automatic Replay/Repeat
 
@@ -57,17 +57,17 @@ Using another gesture/button in order to record a sequence of movements of the k
 
 ### Implementing a PID control loop
 
-The proportional–integral–derivative (PID) control loop will provide angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically thr desired angel. It will also revert the Dagu into its original stance in case any obstacles try to divert it.   
+The proportional–integral–derivative (PID) control loop will provide angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angel. It will also revert the Dagu into its original stance in case any obstacles try to divert it.   
 
 This will enhance Dagu stability and response accuracy to the gestures. In addition, it will eliminate the effect of external obstacles and diversions. 
 
-## Forseen limitations
+## Foreseen  limitations
 
 - Limited range of the Bluetooth communication modules, the kit has to be operated in close-range
 
-- No encoders on the Dagu motors, this makes re-mapping or automation inaccuate
+- No encoders on the Dagu motors, this makes re-mapping or automation inaccurate
 
 - Manufacturing a more stable glove with allocated space for the components
 
 
-## Planned miletones 
+## Planned milestones 
