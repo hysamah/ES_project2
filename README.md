@@ -44,9 +44,9 @@ Keil uVision 5
 STM 32 Cube programmer 
 
 ## Proposed Architecture
+![Getting Started](ES_P2_Architecture.jpg)
 
 ## Proposed Schematic
-
 
 
 ## Potential enhancements 
