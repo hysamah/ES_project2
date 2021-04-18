@@ -14,7 +14,7 @@ We plan to implement 5 gestures:
 
 
 
-## Components 
+## Hardware Components 
 
 ### Microcontroller 
 
