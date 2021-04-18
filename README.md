@@ -74,4 +74,4 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 -	April 24th: implemented & tested communication 
 -	April 26th: tested & tuned the sensors
 -	April 29th: Integrated system 
--	May 2nd: Tested and Tuned the whole system + debugging 
+-	May 2nd: Testing and Tuning the whole system + debugging 
