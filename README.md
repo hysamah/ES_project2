@@ -46,8 +46,6 @@ STM 32 Cube programmer
 ## Proposed Architecture
 ![Getting Started](ES_P2_Architecture.jpg)
 
-## Proposed Schematic
-
 
 ## Potential enhancements 
 
@@ -71,3 +69,9 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 
 
 ## Planned milestones 
+
+-	April 22nd: Acquired the components 
+-	April 24th: implemented & tested communication 
+-	April 26th: tested & tuned the sensors
+-	April 29th: Integrated system 
+-	May 2nd: Tested and Tuned the whole system + debugging 
