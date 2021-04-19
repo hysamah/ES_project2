@@ -69,7 +69,7 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 
 - No encoders on the Dagu motors, this makes re-mapping or automation inaccurate
 
-- Manufacturing a more stable glove with allocated space for the components
+- No optimized or stable glove with allocated space for the components
 
 
 ## Planned milestones 
@@ -80,4 +80,5 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 -	April 29th: Integrated system 
 -	May 2nd: Testing and Tuning the whole system + debugging 
 
-## References
+## Proposal Video
+[Hand Gesture Driven Dagu Proposal](https://drive.google.com/file/d/1rHvJYfV3ZO3Wg04cuTE-szriirWaFO4K/view?usp=sharing)
