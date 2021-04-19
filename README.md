@@ -28,7 +28,7 @@ Pololu TReX Dual Motor Controller: DMC01
 
 ### Communication 
 
-Bluetooth Moduel: HC-06 x2
+Bluetooth Module: HC-06 x2
 
 ### Sensors 
 
