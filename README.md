@@ -2,7 +2,7 @@
 
 ## Project Motivation
 
-Replecating human movements is highly desired in many applications, for instance cooking robots. There exist a multitude of sensors that provide means to acquire signals that could resemble the motion done by humans. The data from those sensors could be utilized to automate some actions of those robots , for instance stirring soup, to be repeated by the robot automatically with no human in control. This project represnets an illustration to this concept throw translating hand gestures into motion done by a 4WD robot.
+Replicating human movements is highly desired in many applications, for instance, cooking robots. There exist a multitude of sensors that provide means to acquire signals that could resemble the motion done by humans. The data from those sensors could be utilized to automate some actions of those robots, for instance stirring soup, to be repeated by the robot automatically with no human in control. This project represents an illustration of this concept through translating certain hand gestures into motion done by a 4WD robot.
 
 ## Project Idea
 
