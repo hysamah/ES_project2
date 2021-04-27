@@ -1,9 +1,13 @@
 # ES_project2
 
+## Project Motivation
+
+Replicating human movements is highly desired in many applications, for instance, cooking robots. There exist a multitude of sensors that provide means to acquire signals that could resemble the motion done by humans. The data from those sensors could be utilized to automate some actions of those robots, for instance stirring soup, to be repeated by the robot automatically with no human in control. This project represents an illustration of this concept through translating certain hand gestures into motion done by a 4WD robot.
+
 ## Project Idea
 
 
-Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors and an embedded MCU. We use a mixture of flex sensors and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communitcates the desired car movements to another Nucleo-32 board in the Dagu kit using a bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction.
+Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors and an embedded MCU. We use a mixture of flex sensors and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communicates  the desired car movements to another Nucleo-32 board in the Dagu kit using a bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction.
 
 We plan to implement 5 gestures:
 -  open palm for stopping/braking 
@@ -14,7 +18,7 @@ We plan to implement 5 gestures:
 
 
 
-## Components 
+## Hardware Components 
 
 ### Microcontroller 
 
@@ -28,7 +32,7 @@ Pololu TReX Dual Motor Controller: DMC01
 
 ### Communication 
 
-Bluetooth Moduel: HC-06 x2
+Bluetooth Module: HC-06 x2
 
 ### Sensors 
 
@@ -65,7 +69,7 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 
 - No encoders on the Dagu motors, this makes re-mapping or automation inaccurate
 
-- Manufacturing a more stable glove with allocated space for the components
+- No optimized or stable glove with allocated space for the components
 
 
 ## Planned milestones 
@@ -75,3 +79,6 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 -	April 26th: tested & tuned the sensors
 -	April 29th: Integrated system 
 -	May 2nd: Testing and Tuning the whole system + debugging 
+
+## Proposal Video
+[Hand Gesture Driven Dagu Proposal](https://drive.google.com/file/d/1rHvJYfV3ZO3Wg04cuTE-szriirWaFO4K/view?usp=sharing)
