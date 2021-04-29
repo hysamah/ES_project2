@@ -22,6 +22,7 @@
 #include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bno055_stm32.h" //ADD THE PATH FOR THIS FILE IN THE "INCLUDES" FROM THE "OPTIONS FOR TARGET" ICON
@@ -49,8 +50,6 @@
 /* USER CODE BEGIN PV */
 
 uint8_t endl[2] ={'\r' , '\n'};
-//uint8_t ex[1] ={'P'};
-char ex[1] ={'P'};
 
 
 
@@ -113,11 +112,38 @@ int main(void)
     snprintf(disp1, sizeof(disp1), "Heading: %.2f Roll: %.2f Pitch: %.2f\r\n", v.x, v.y, v.z);
 		HAL_UART_Transmit(&huart2, (uint8_t*)disp1, sizeof(disp1), HAL_MAX_DELAY);
 		HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+		
+		if (v.y>5)
+		{
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
+			HAL_Delay(v.y*2);
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
+		}
+		if (v.y<-5)
+		{
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+			HAL_Delay(v.y*2);
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+		}
+		if (v.z>5)
+		{
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+			HAL_Delay(v.z*2);
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+		}
+		if (v.z<-5)
+		{
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
+			HAL_Delay(v.z*2);
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
+		}
+		
     v = bno055_getVectorQuaternion();
     snprintf(disp2, sizeof(disp2), "W: %.2f X: %.2f Y: %.2f Z: %.2f\r\n", v.w, v.x, v.y, v.z);
 		HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
 		HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
-    HAL_Delay(500);
+		
+    HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
