@@ -1,6 +1,7 @@
-#include "bno055_stm32.h"
+#include "main.h"
+#include "bno055.h"
 
-ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc1;
 
 uint16_t read_flex()
 {
