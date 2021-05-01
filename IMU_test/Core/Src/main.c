@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
@@ -50,6 +51,12 @@
 /* USER CODE BEGIN PV */
 
 uint8_t endl[2] ={'\r' , '\n'};
+uint16_t raw, flex;
+char msg[10];
+char disp1[64];
+char disp2[64];
+uint8_t arr[4]={0xC2, 0x32, 0xCA, 0x32};
+double roll, pitch;
 
 
 
@@ -58,11 +65,47 @@ uint8_t endl[2] ={'\r' , '\n'};
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+uint16_t read_flex();
+bno055_vector_t read_imu();
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+
+
+
+uint16_t read_flex()
+{
+		// Test: Set GPIO pin high
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+
+    // Get ADC value
+    HAL_ADC_Start(&hadc1);
+    HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+    raw = HAL_ADC_GetValue(&hadc1);
+
+    // Test: Set GPIO pin low
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+
+    // Convert to string and print
+    snprintf(msg, sizeof(msg), "%d", raw);
+    HAL_UART_Transmit(&huart2, (unsigned char *)msg, sizeof(msg), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+		return raw;
+}
+
+bno055_vector_t read_imu()
+{
+	bno055_vector_t c = bno055_getVectorEuler();
+  snprintf(disp1, sizeof(disp1), "Heading: %.2f Roll: %.2f Pitch: %.2f\r\n", c.x, c.y, c.z);
+	HAL_UART_Transmit(&huart2, (uint8_t*)disp1, sizeof(disp1), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+	return c;
+}
+
+
 
 /* USER CODE END 0 */
 
@@ -73,8 +116,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	char disp1[64];
-	char disp2[64];
+
 
   /* USER CODE END 1 */
 
@@ -96,10 +138,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_I2C1_Init();
   MX_USART2_UART_Init();
+  MX_ADC1_Init();
+  MX_USART1_UART_Init();
+  MX_I2C3_Init();
+	
   /* USER CODE BEGIN 2 */
-	bno055_assignI2C(&hi2c1);
+	bno055_assignI2C(&hi2c3);
   bno055_setup();
   bno055_setOperationModeNDOF();
   /* USER CODE END 2 */
@@ -108,46 +153,99 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		bno055_vector_t v = bno055_getVectorEuler();
-    snprintf(disp1, sizeof(disp1), "Heading: %.2f Roll: %.2f Pitch: %.2f\r\n", v.x, v.y, v.z);
-		HAL_UART_Transmit(&huart2, (uint8_t*)disp1, sizeof(disp1), HAL_MAX_DELAY);
-		HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+		flex = read_flex();
+		bno055_vector_t v = read_imu();
+		roll = v.y;
+    pitch = v.z;
+		if (flex<2000)
+		{
+			if (v.y>5)  //going forward
+			{
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
+				HAL_Delay(v.y*2);
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
+				snprintf(disp2, sizeof(disp2), "FRONT");
+				arr[0]=0xC2;
+				arr[2]=0xCA;
+				arr[1]=(roll/180.0)*127;
+				arr[3]=(roll/180.0)*127;
+				HAL_UART_Transmit (&huart1, arr, 4,HAL_MAX_DELAY);
+				HAL_Delay(200);
+				HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
+				HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+				
+			}
+			if (v.y<-5)  //going backwards
+			{
+				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+				HAL_Delay(v.y*2);
+				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+				snprintf(disp2, sizeof(disp2), "BACK");
+				arr[0]=0xC1;
+				arr[2]=0xC9;
+				arr[1]=(-roll/180.0)*127;
+				arr[3]=(-roll/180.0)*127;
+				HAL_UART_Transmit (&huart1, arr, 4,HAL_MAX_DELAY);
+				HAL_Delay(200);
+				HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
+				HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+				//HAL_Delay(200);
+			}
+			if (v.z>5)  //right turn
+			{
+				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+				HAL_Delay(v.z*2);
+				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
+				snprintf(disp2, sizeof(disp2), "RIGHT");
+				arr[1]=0x00;
+				arr[3]=pitch;
+				HAL_UART_Transmit (&huart1, arr, 4,HAL_MAX_DELAY);
+				HAL_Delay(200);
+				HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
+				HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+				//HAL_Delay(200);
+			}
+			if (v.z<-5)  //left turn
+			{
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
+				HAL_Delay(v.z*2);
+				HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
+				snprintf(disp2, sizeof(disp2), "LEFT");
+				arr[1]=pitch;
+				arr[3]=0x00;
+				HAL_UART_Transmit (&huart1, arr, 4,HAL_MAX_DELAY);
+				HAL_Delay(200);
+				HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
+				HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+				//HAL_Delay(200);
+			}
+		}
+		else
+		{
+			snprintf(disp2, sizeof(disp2), "STOP");
+			arr[1]=0x00;
+      arr[3]=0x00;
+      HAL_UART_Transmit (&huart1, arr, 4,HAL_MAX_DELAY);
+			HAL_Delay(200);
+			HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
+			HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
+			//HAL_Delay(200);
+		}
 		
-		if (v.y>5)
-		{
-			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
-			HAL_Delay(v.y*2);
-			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_0);
-		}
-		if (v.y<-5)
-		{
-			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
-			HAL_Delay(v.y*2);
-			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
-		}
-		if (v.z>5)
-		{
-			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
-			HAL_Delay(v.z*2);
-			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_1);
-		}
-		if (v.z<-5)
-		{
-			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
-			HAL_Delay(v.z*2);
-			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
-		}
+
 		
-    v = bno055_getVectorQuaternion();
-    snprintf(disp2, sizeof(disp2), "W: %.2f X: %.2f Y: %.2f Z: %.2f\r\n", v.w, v.x, v.y, v.z);
-		HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
-		HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
-		
-    HAL_Delay(10);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
+	
+	//COMMENTED LOCALISATION CODE
+	
+	//    v = bno055_getVectorQuaternion();
+//    snprintf(disp2, sizeof(disp2), "W: %.2f X: %.2f Y: %.2f Z: %.2f\r\n", v.w, v.x, v.y, v.z);
+//		HAL_UART_Transmit(&huart2, (uint8_t*)disp2, sizeof(disp2), HAL_MAX_DELAY);
+//		HAL_UART_Transmit(&huart2, (unsigned char *)endl, 2, HAL_MAX_DELAY);
   /* USER CODE END 3 */
 }
 
@@ -197,9 +295,19 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART2
+                              |RCC_PERIPHCLK_I2C3|RCC_PERIPHCLK_ADC;
+  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+  PeriphClkInit.I2c3ClockSelection = RCC_I2C3CLKSOURCE_PCLK1;
+  PeriphClkInit.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
+  PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_MSI;
+  PeriphClkInit.PLLSAI1.PLLSAI1M = 1;
+  PeriphClkInit.PLLSAI1.PLLSAI1N = 16;
+  PeriphClkInit.PLLSAI1.PLLSAI1P = RCC_PLLP_DIV7;
+  PeriphClkInit.PLLSAI1.PLLSAI1Q = RCC_PLLQ_DIV2;
+  PeriphClkInit.PLLSAI1.PLLSAI1R = RCC_PLLR_DIV2;
+  PeriphClkInit.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_ADC1CLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();

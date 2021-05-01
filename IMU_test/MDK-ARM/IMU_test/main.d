@@ -21,6 +21,9 @@ imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_gpio.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_gpio_ex.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_dma.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_cortex.h
+imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_adc.h
+imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_adc.h
+imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_adc_ex.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_exti.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_flash.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_flash_ex.h
@@ -31,6 +34,7 @@ imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr_ex.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h
 imu_test\main.o: ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h
+imu_test\main.o: ../Core/Inc/adc.h
 imu_test\main.o: ../Core/Inc/i2c.h
 imu_test\main.o: ../Core/Inc/usart.h
 imu_test\main.o: ../Core/Inc/gpio.h
