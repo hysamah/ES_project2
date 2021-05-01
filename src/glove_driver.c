@@ -11,9 +11,14 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 
 char driver_msg[] = {0xCA, 0x00, 0xC2, 0x00};
+char init_msg[] = {'A'};
+char end_msg[] = {'T'};
+char term_val[] = {'\n'};
+char asciiMsg[3];
 
 void command_dagu(void)
 {
+		int i;
 		uint16_t flex_val, pitch, roll, speed_common;
 		bno055_vector_t v;
 		int direction;
@@ -66,5 +71,13 @@ void command_dagu(void)
 				driver_msg[1] = 0;
 				driver_msg[3] = 0;
 		}	
-		HAL_UART_Transmit(&huart1, (uint8_t*)driver_msg, sizeof(driver_msg), HAL_MAX_DELAY);
+		
+		HAL_UART_Transmit(&huart1, (uint8_t*)init_msg, sizeof(init_msg), HAL_MAX_DELAY);
+		for(i = 0; i < 4; i++)
+		{
+				snprintf(asciiMsg, sizeof(asciiMsg), "%u", driver_msg[i]);
+				HAL_UART_Transmit(&huart1, (uint8_t*)asciiMsg, sizeof(asciiMsg), HAL_MAX_DELAY);
+				HAL_UART_Transmit(&huart1, (uint8_t*)term_val, sizeof(term_val), HAL_MAX_DELAY);
+		}
+		HAL_UART_Transmit(&huart1, (uint8_t*)end_msg, sizeof(end_msg), HAL_MAX_DELAY);
 }
