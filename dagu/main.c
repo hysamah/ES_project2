@@ -46,10 +46,16 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 	volatile short flag=0;
-	int c=0;
+	volatile int c=0;
+	volatile int c2=0;
 	uint8_t data;
 	char recieved[3];
-	
+	uint8_t byte;
+	uint8_t motion[4];
+	char asciiMsg[3];
+	volatile int g=0;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,103 +70,63 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//void receive_send()
-//{
-//	uint8_t start;
-//	uint8_t motion[4];
-//	int i=0;
-//	char send[3];
-//	HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
-//	HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
-//	if (start == 'A')		
-//	{
-//		HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
-//		HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
-//		for(i=0; i<4; i++)
-//		
-//		{
-//				while(start != '\n')
-//			{
-//				HAL_UART_Receive (&huart1, send, sizeof(send), HAL_MAX_DELAY);	
-//			}
-//			sscanf(send, "%u", motion[i]);
-//		}
-//		
-//	}
-//  HAL_UART_Transmit (&huart2, motion, sizeof(motion), HAL_MAX_DELAY);
-//	//HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
-//}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void receive_send(uint8_t tdata)
 {
-	uint8_t byte;
-	if (data == 'A')
+	//HAL_UART_Transmit (&huart2, &tdata, sizeof(tdata), HAL_MAX_DELAY);  //for checking correct data sending
+	//HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
+
+
+	if (tdata == 'A')
 	{
 		flag = 1;
 	}
 	else if (flag ==1)
 	{
-		if (data != '\n')
+		if (tdata != '\n' && c <3)
+		//if (tdata != '\n')
 		{
-			recieved[c]=data;
+			recieved[c]=tdata;
 			c++;
 		}
 		else 
 		{
 			c = 0;
 			sscanf(recieved, "%u", &byte);
-			HAL_UART_Transmit (&huart2, &byte, sizeof(byte), HAL_MAX_DELAY);
+			if(c2 >= 4)
+			{
+				c2 = 0;
+			}
+				
+			else
+			{
+				motion[c2] = byte;
+				c2++;
+			}
 		}
 	}
-	if (data == 'T')
+	if (tdata == 'T')
 	{
 		flag = 0;
+		
+		//output for teraterm 
+//		HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
+//		for (int q=0; q<sizeof(motion); q++) 
+//		{
+//			snprintf(asciiMsg, sizeof(asciiMsg), "%u", motion[q]);
+//			HAL_UART_Transmit (&huart2, (uint8_t*)asciiMsg, sizeof(asciiMsg), HAL_MAX_DELAY);
+//		}
+//		HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
+		
+		HAL_UART_Transmit (&huart2, motion, sizeof(motion), HAL_MAX_DELAY);   //output for dagu (don't forget setting the baudrate)
 	}
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-	volatile int g=2;
 	g++;
-	//huart->State
 }
 
-void receive_send()
-{
-	uint8_t start;
-	uint8_t motion[4];
-	uint8_t byte;
-	uint8_t end_msg[3] = {'E', 'N', 'D'};
-
-	int i=0;
-	char send[3];
-	while (flag==1)
-	{
-		HAL_UART_Receive (&huart1, send, sizeof(send), HAL_MAX_DELAY);
-		HAL_UART_Transmit (&huart2, send, sizeof(send), HAL_MAX_DELAY);
-		HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);		
-		if (send[0] == end_msg[0])
-		{
-			flag = 0;
-		}
-		else
-		{
-			sscanf(send, "%u", &byte);
-			HAL_UART_Transmit (&huart2, &byte, sizeof(motion), HAL_MAX_DELAY);
-			HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
-		}
-	}
-	if (flag == 0) 
-	{
-		HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
-		HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
-		HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
-		if (start == 'A')		
-		{
-			flag=1;
-		}
-	}
-}
 
 /* USER CODE END 0 */
 
@@ -203,11 +169,15 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
-	HAL_UART_Receive_IT(&huart1, &data, 1 );
+	//HAL_UART_Receive_IT(&huart1, &data, 1 );
   while (1)
   {
+	
 		
-		//__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+		if (c>3)
+		{
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -356,14 +326,127 @@ static void MX_USART2_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PB3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
 /* USER CODE BEGIN 4 */
+
+//void receive_send()
+//{
+//	uint8_t start;
+//	uint8_t motion[4];
+//	int i=0;
+//	char send[3];
+//	HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
+//	HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
+//	if (start == 'A')		
+//	{
+//		HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
+//		HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
+//		for(i=0; i<4; i++)
+//		
+//		{
+//				while(start != '\n')
+//			{
+//				HAL_UART_Receive (&huart1, send, sizeof(send), HAL_MAX_DELAY);	
+//			}
+//			sscanf(send, "%u", motion[i]);
+//		}
+//		
+//	}
+//  HAL_UART_Transmit (&huart2, motion, sizeof(motion), HAL_MAX_DELAY);
+//	//HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
+//}
+
+//void receive_send()
+//{
+//	uint8_t start;
+//	uint8_t motion[4];
+//	uint8_t byte;
+//	uint8_t end_msg[3] = {'E', 'N', 'D'};
+
+//	int i=0;
+//	char send[3];
+//	while (flag==1)
+//	{
+//		HAL_UART_Receive (&huart1, send, sizeof(send), HAL_MAX_DELAY);
+//		HAL_UART_Transmit (&huart2, send, sizeof(send), HAL_MAX_DELAY);
+//		HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);		
+//		if (send[0] == end_msg[0])
+//		{
+//			flag = 0;
+//		}
+//		else
+//		{
+//			sscanf(send, "%u", &byte);
+//			HAL_UART_Transmit (&huart2, &byte, sizeof(motion), HAL_MAX_DELAY);
+//			HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
+//		}
+//	}
+//	if (flag == 0) 
+//	{
+//		HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
+//		HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
+//		HAL_UART_Transmit (&huart2, "\n \r", sizeof("\n \r"),5);
+//		if (start == 'A')		
+//		{
+//			flag=1;
+//		}
+//	}
+//}
+
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	if (data == 'A')
+//	{
+//		flag = 1;
+//	}
+//	else if (flag ==1)
+//	{
+//		if (data != '\n')
+//		{
+//			recieved[c]=data;
+//			c++;
+//		}
+//		else 
+//		{
+//			c = 0;
+//			sscanf(recieved, "%u", &byte);
+//			if(c2 >= 4)
+//			{
+//				c2 = 0;
+//			}
+//				
+//			else
+//			{
+//				motion[c2] = byte;
+//				c2++;
+//			}
+//			//HAL_UART_Transmit (&huart2, &byte, sizeof(byte), 100);
+//		}
+//	}
+//	if (data == 'T')
+//	{
+//		flag = 0;
+//	}
+//}
+
 
 /* USER CODE END 4 */
 
