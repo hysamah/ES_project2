@@ -32,7 +32,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-extern void receive_send();
 
 /* USER CODE END PD */
 
@@ -59,7 +58,9 @@ extern void receive_send();
 /* External variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
-
+extern UART_HandleTypeDef huart2;
+extern uint8_t data;
+extern void receive_send(uint8_t);
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -203,23 +204,20 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles USART1 global interrupt.
   */
-
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-	//receive_send();
 	uint8_t start;
-	uint8_t grabage[3];
-	extern UART_HandleTypeDef huart2;
-	//__HAL_UART_DISABLE_IT(&huart1, UART_IT_RXNE);
-		HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
-		HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
-		HAL_UART_Transmit (&huart2, "\r\n", sizeof("\r\n"), HAL_MAX_DELAY);
+	__HAL_UART_DISABLE_IT(&huart1, UART_IT_RXNE);
+	HAL_UART_Receive (&huart1, &start, sizeof(start), HAL_MAX_DELAY);
+	receive_send(start);
+	//HAL_UART_Transmit (&huart2, &start, sizeof(start), HAL_MAX_DELAY);
 
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-	//__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+	
+	//HAL_UART_Receive_IT(&huart1, &data, 1 );
 
   /* USER CODE END USART1_IRQn 1 */
 }
