@@ -14,7 +14,9 @@ char driver_msg[] = {0xCA, 0x00, 0xC2, 0x00};
 char init_msg[] = {'A'};
 char end_msg[] = {'T'};
 char term_val[] = {'\n'};
+char endl[] = {'\r', '\n'};
 char asciiMsg[3];
+uint8_t byte;
 
 void command_dagu(void)
 {
@@ -76,7 +78,11 @@ void command_dagu(void)
 		for(i = 0; i < 4; i++)
 		{
 				snprintf(asciiMsg, sizeof(asciiMsg), "%u", driver_msg[i]);
-				HAL_UART_Transmit(&huart1, (uint8_t*)asciiMsg, sizeof(asciiMsg), HAL_MAX_DELAY);
+				for (int j=0; j<sizeof(asciiMsg); j++)
+				{
+					byte = (uint8_t)asciiMsg[j];
+					HAL_UART_Transmit(&huart1, &byte, sizeof(asciiMsg[j]), HAL_MAX_DELAY);
+				}
 				HAL_UART_Transmit(&huart1, (uint8_t*)term_val, sizeof(term_val), HAL_MAX_DELAY);
 		}
 		HAL_UART_Transmit(&huart1, (uint8_t*)end_msg, sizeof(end_msg), HAL_MAX_DELAY);
