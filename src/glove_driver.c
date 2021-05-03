@@ -2,6 +2,10 @@
 #include "bno055.h"
 #include "utils.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+
 
 #define IGNORE_FLEX 1
 // #define IGNORE_FLEX 0
@@ -17,6 +21,9 @@ char term_val[] = {'\n'};
 char endl[] = {'\r', '\n'};
 char asciiMsg[3];
 uint8_t byte;
+char fixed_msg[15];
+uint8_t fbyte;
+
 
 void command_dagu(void)
 {
@@ -25,6 +32,8 @@ void command_dagu(void)
 		bno055_vector_t v;
 		int direction;
 		flex_val = read_flex();
+		fixed_msg[0]=init_msg[0];
+		
 	
 		if(flex_val < 2000 || IGNORE_FLEX == 1)	// Read the IMU and move DAGU
 		{
@@ -74,16 +83,16 @@ void command_dagu(void)
 				driver_msg[3] = 0;
 		}	
 		
-		HAL_UART_Transmit(&huart1, (uint8_t*)init_msg, sizeof(init_msg), HAL_MAX_DELAY);
+		
+		
 		for(i = 0; i < 4; i++)
 		{
-				snprintf(asciiMsg, sizeof(asciiMsg), "%u", driver_msg[i]);
-				for (int j=0; j<sizeof(asciiMsg); j++)
-				{
-					byte = (uint8_t)asciiMsg[j];
-					HAL_UART_Transmit(&huart1, &byte, sizeof(asciiMsg[j]), HAL_MAX_DELAY);
-				}
-				HAL_UART_Transmit(&huart1, (uint8_t*)term_val, sizeof(term_val), HAL_MAX_DELAY);
+				sprintf(asciiMsg, "%03u", driver_msg[i]);
+				memcpy(&fixed_msg[1+i*3], asciiMsg, 3);
 		}
-		HAL_UART_Transmit(&huart1, (uint8_t*)end_msg, sizeof(end_msg), HAL_MAX_DELAY);
+		fixed_msg[13]=end_msg[0];
+		fixed_msg[14]='\0';
+		HAL_UART_Transmit(&huart1, (uint8_t*)fixed_msg, sizeof(fixed_msg), HAL_MAX_DELAY);
+		HAL_Delay(100);
+		
 }
