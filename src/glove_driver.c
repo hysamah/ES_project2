@@ -14,26 +14,26 @@
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 
-char driver_msg[] = {0xCA, 0x00, 0xC2, 0x00};
+volatile char driver_msg[] = {0xCA, 0x00, 0xC2, 0x00};
 char init_msg[] = {'A'};
 char end_msg[] = {'T'};
 char term_val[] = {'\n'};
 char endl[] = {'\r', '\n'};
 char asciiMsg[3];
 uint8_t byte;
-char fixed_msg[15];
+char fixed_msg[18];
 uint8_t fbyte;
 
 
 void command_dagu(void)
 {
 		int i;
-		uint16_t flex_val, pitch, roll, speed_common;
-		bno055_vector_t v;
-		int direction;
+		volatile uint16_t flex_val, pitch, roll, speed_common;
+		volatile bno055_vector_t v;
+		volatile short direction;
 		flex_val = read_flex();
 		fixed_msg[0]=init_msg[0];
-		
+	
 	
 		if(flex_val < 2000 || IGNORE_FLEX == 1)	// Read the IMU and move DAGU
 		{
@@ -76,6 +76,14 @@ void command_dagu(void)
 								driver_msg[2] = 0xC2;
 						}
 				}
+				else 
+				{
+						driver_msg[0] = 0xCA; 
+						driver_msg[2] = 0xC1;
+						driver_msg[1] = 0;
+						driver_msg[3] = 0;
+					
+				}
 		}
 		else // Stop Dagu
 		{
@@ -84,15 +92,8 @@ void command_dagu(void)
 		}	
 		
 		
-		
-		for(i = 0; i < 4; i++)
-		{
-				sprintf(asciiMsg, "%03u", driver_msg[i]);
-				memcpy(&fixed_msg[1+i*3], asciiMsg, 3);
-		}
-		fixed_msg[13]=end_msg[0];
-		fixed_msg[14]='\0';
-		HAL_UART_Transmit(&huart1, (uint8_t*)fixed_msg, sizeof(fixed_msg), HAL_MAX_DELAY);
-		HAL_Delay(100);
+		sprintf(&fixed_msg[1], " %03u %03u %03u %03u", driver_msg[0], driver_msg[1], driver_msg[2], driver_msg[3]);
+		HAL_UART_Transmit(&huart1, (uint8_t*)fixed_msg, strlen(fixed_msg), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart2, (uint8_t*)fixed_msg, strlen(fixed_msg), HAL_MAX_DELAY);
 		
 }
