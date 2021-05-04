@@ -29,11 +29,11 @@ void command_dagu(void)
 		volatile uint16_t flex_val, pitch, roll, speed_common;
 		volatile bno055_vector_t v;
 		volatile short direction;
-		flex_val = read_flex();
+		flex_val = read_flex();  //greater than 1450 at resistance 1.1KOhm for the pulldown of the flex 
 		fixed_msg[0]=init_msg[0];
 	
 	
-		if(flex_val < 500)	// Read the IMU and move DAGU
+		if(flex_val > 1450)	// Read the IMU and move DAGU
 		{
 				v = read_imu();
 				pitch = abs((int)v.y);
