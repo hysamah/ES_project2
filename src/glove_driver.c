@@ -7,8 +7,6 @@
 
 
 
-#define IGNORE_FLEX 1
-// #define IGNORE_FLEX 0
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 extern UART_HandleTypeDef huart1;
@@ -35,14 +33,14 @@ void command_dagu(void)
 		fixed_msg[0]=init_msg[0];
 	
 	
-		if(flex_val < 2000 || IGNORE_FLEX == 1)	// Read the IMU and move DAGU
+		if(flex_val < 500)	// Read the IMU and move DAGU
 		{
 				v = read_imu();
 				pitch = abs((int)v.y);
 				roll = abs((int)v.z);
 			
 				// Prioritize forward over rotate
-				if(pitch > 5) // Threshold magnitude to consider motion
+				if(pitch > 5 && pitch > roll) // Threshold magnitude to consider motion
 				{
 						direction = (v.y > 0);
 						speed_common = MIN((pitch / 90.0) * 127, 127);
