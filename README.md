@@ -143,7 +143,6 @@ __enable_irq();
   }
 ```
 
-# insert Interrupt handler code & main loop code
 
 ### API Details
 This side has two main drivers; `void dagu_digest(void)` and `void receive_data(void)`.
