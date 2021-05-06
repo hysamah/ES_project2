@@ -121,17 +121,18 @@ This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as i
 #### UART2
 This UART is configured at Baud rate 19200 to send the motion bytes to the Pololu motor controller. Sending via this UART is done inside the main loop.
 
-``void USART1_IRQHandler(void)
+```
+void USART1_IRQHandler(void)
 {
 	extern volatile int rec_flag;
 	rec_flag = 1;
 	__HAL_UART_DISABLE_IT(&huart1,UART_IT_RXNE);
   HAL_UART_IRQHandler(&huart1);
-}``
+}
+```
 
-
-
-``__enable_irq();
+```
+__enable_irq();
 	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
   while (1)
   {
@@ -140,7 +141,7 @@ This UART is configured at Baud rate 19200 to send the motion bytes to the Polol
 				receive_data();
 		}
   }
-``
+```
 
 # insert Interrupt handler code & main loop code
 
@@ -169,7 +170,7 @@ This function is called inside the `receive_data` function. inside `dagu_digest`
 - Completed & tested basic motion algorithm based on the sensors' data  
  
 ## First Demo Video
-![Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1osNEbPCETx6UBfbIYG2R1vcQnqG6cy6l/view?usp=sharing) 
+[Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1osNEbPCETx6UBfbIYG2R1vcQnqG6cy6l/view?usp=sharing) 
 
 ## Next Phase Features
 
