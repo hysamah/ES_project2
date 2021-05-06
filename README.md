@@ -135,7 +135,7 @@ This function is called inside the main loop after setting the sending flag. ins
 - Completed & tested basic motion algorithm based on the sensors' data  
  
 ## First Demo Video
-![Hand Gesture Driven Dagu Demo](Media/Demo1.mp4) 
+[Hand Gesture Driven Dagu Demo](Media/Demo1.mp4) 
 
 ## Next Phase Features
 
