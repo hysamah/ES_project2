@@ -121,16 +121,17 @@ This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as i
 #### UART2
 This UART is configured at Baud rate 19200 to send the motion bytes to the Pololu motor controller. Sending via this UART is done inside the main loop.
 
-```void USART1_IRQHandler(void)
+``void USART1_IRQHandler(void)
 {
 	extern volatile int rec_flag;
 	rec_flag = 1;
 	__HAL_UART_DISABLE_IT(&huart1,UART_IT_RXNE);
   HAL_UART_IRQHandler(&huart1);
-}```
+}``
 
-```
-__enable_irq();
+
+
+``__enable_irq();
 	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
   while (1)
   {
@@ -139,7 +140,7 @@ __enable_irq();
 				receive_data();
 		}
   }
-```
+``
 
 # insert Interrupt handler code & main loop code
 
