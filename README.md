@@ -75,7 +75,7 @@ ADC1 peripheral is used to get readings from the flex sensor. The flex sensor ac
 #### I2C 
 I2C3 peripheral is used to interface with the BNO055 IMU sensor. This sensor produces angular values for its current orientation in 3 directions. We used Two of the given reading values for our purpose; the Pitch and Roll. 
 The BNO055 sensor has on-board DSP chip, so it sends over the I2C connection the accurate digital values of the current orientation. 
-For interfacing with the sensor we used [this](https://github.com/ivyknob/bno055_stm32) Library which is built on top of [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) specifically for the STM32 MCUs. 
+For interfacing with the sensor we used [bno055_stm32-master](https://github.com/ivyknob/bno055_stm32) Library which is built on top of [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) specifically for the STM32 MCUs. 
 
 #### UART 
 UART1 is used in connection with the Bluetooth module in order to send the motion values over UART to the Dagu 4WD. The used Baud rate for this communication is 9600. 
@@ -135,7 +135,7 @@ This function is called inside the main loop after setting the sending flag. ins
 - Completed & tested basic motion algorithm based on the sensors' data  
  
 ## First Demo Video
-[Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1rHvJYfV3ZO3Wg04cuTE-szriirWaFO4K/view?usp=sharing) //insert demo link
+![Hand Gesture Driven Dagu Demo](Media/Demo1.mp4) 
 
 ## Next Phase Features
 
@@ -156,7 +156,6 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 
 
 
-
 ## Foreseen  limitations
 
 - Limited range of the Bluetooth communication modules, the kit has to be operated in close-range
@@ -165,12 +164,5 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 
 - No optimized or stable glove with allocated space for the components
 
-## Planned milestones 
-
--	April 22nd: Acquired the components 
--	April 24th: implemented & tested communication 
--	April 26th: tested & tuned the sensors
--	April 29th: Integrated system 
--	May 2nd: Testing and Tuning the whole system + debugging 
 
 
