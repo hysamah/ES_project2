@@ -9,7 +9,7 @@ Replicating human movements is highly desired in many applications, for instance
 
 Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors and an embedded MCU. We use a mixture of flex sensors and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communicates  the desired car movements to another Nucleo-32 board in the Dagu kit using a bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction.
 
-We implement 5 basic gestures:
+Our project has 5 basic gestures:
 -  open palm for stopping/braking 
 -  closed fist + downwards rotate (pitch angle) for forward
 -  closed fist + upwards rotate (pitch angle) for reverse
@@ -178,7 +178,7 @@ This function is called inside the `receive_data` function. inside `dagu_digest`
 Using another gesture in order to record (sample) a sequence of movements of the kit and then replay these movements automatically on gesturing. 
 
 ### Prototyping
-
+designing a glove equipped with the specified components to ease the control of the dagu
 
 ## Potential enhancements 
  ### Implementing a PID control loop
@@ -190,7 +190,7 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 
 
 
-## Foreseen  limitations
+## limitations
 
 - Limited range of the Bluetooth communication modules, the kit has to be operated in close-range
 
