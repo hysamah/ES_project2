@@ -9,7 +9,7 @@ Replicating human movements is highly desired in many applications, for instance
 
 Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors and an embedded MCU. We use a mixture of flex sensors and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communicates  the desired car movements to another Nucleo-32 board in the Dagu kit using a bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction.
 
-We plan to implement 5 gestures:
+We implement 5 basic gestures:
 -  open palm for stopping/braking 
 -  closed fist + downwards rotate (pitch angle) for forward
 -  closed fist + upwards rotate (pitch angle) for reverse
@@ -62,6 +62,8 @@ The HC-05 modules were configured using AT commands to pair with each other and 
 
 
 ## Glove Controller Side
+
+![glove_mx](Media/Glove_side_mx.jpg)
 ### Implementation Specs
 
 For this side we used 3 different peripherals of the MCU; ADC, UART, and I2C, to interface with different sensors. 
@@ -73,7 +75,7 @@ ADC1 peripheral is used to get readings from the flex sensor. The flex sensor ac
 #### I2C 
 I2C3 peripheral is used to interface with the BNO055 IMU sensor. This sensor produces angular values for its current orientation in 3 directions. We used Two of the given reading values for our purpose; the Pitch and Roll. 
 The BNO055 sensor has on-board DSP chip, so it sends over the I2C connection the accurate digital values of the current orientation. 
-For interfacing with the sensor we used [this](https://github.com/ivyknob/bno055_stm32) Library which is built on top of the [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) by its manufacturer. 
+For interfacing with the sensor we used [this](https://github.com/ivyknob/bno055_stm32) Library which is built on top of [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) specifically for the STM32 MCUs. 
 
 #### UART 
 UART1 is used in connection with the Bluetooth module in order to send the motion values over UART to the Dagu 4WD. The used Baud rate for this communication is 9600. 
@@ -89,7 +91,13 @@ The main driver function for the glove side is
 `void command_dagu(void)` 
 Inside this function, the data from the flex sensor is read. if the read value exceeds the neutral threshold to indicate "neutral", it proceeds to send braking motion bytes to the Dagu. Otherwise, on receiving "bent" values the function proceeds to read values from the IMU sensor to check if the angels indicate forward motion or rotation. The speed values are made proportional to the IMU angel readings (Greater angel leads to higher speed in a certain direction) 
 
+### Connections 
+![glove_mx](Media/Glove_side_conn.jpg)
+
 ## Dagu 4WD Side
+
+![dagu_mx](Media/Dagu_side_mx.jpg)
+
 ### Implementation Specs
 
 For this side only the UART peripheral was used. UART1 is used in connection to the HC-05 bluetooth module, while UART2 is used to communicate motion values to the Pololu Motor controller. 
@@ -114,6 +122,11 @@ This function is called inside the UART1 ISR to recieve the motion data into a f
 This function is called inside the main loop after setting the sending flag. inside `dagu_digest` the recieved char values for the motion bytes are converted into intgers that are then sent to the Pololu via UART2.
 
 ## Technical Challenges 
+
+- HC-06 bluetooth modules we planned on using are slave-only modules
+- Figuring out the correct sending baud rate from the bluetooth moduels, as too high baudrates resulted in dropped data packets and UART overrun errors 
+- The master Bluetooth module only works with power supply from laptop so far, batteries and other power sources seem to stop bluetooth sending. However, the slave module on the Dagu recieves the data correctly using the Dagu's batteries
+
 
 ## First Demo Video
 [Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1rHvJYfV3ZO3Wg04cuTE-szriirWaFO4K/view?usp=sharing) //insert demo link
