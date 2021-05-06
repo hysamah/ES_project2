@@ -53,10 +53,23 @@ STM 32 Cube programmer
 
 ## Interfacing with the Bluetooth module
 
-Initially, we planned to use two of the HC-05 Bluetooth modules for communication between the Glove and the Dagu. However, we understood later that the HC-06 modules are Slave only modules, meaning they cannot initiate a connection to send/receive data over without the presence of a Master module. Thus, we went for using two HC-05 Modules instead, which can operate in either master or slave modes.
+Initially, we planned to use two of the HC-06 Bluetooth modules for communication between the Glove and the Dagu. However, we understood later that the HC-06 modules are Slave only modules, meaning they cannot initiate a connection to send/receive data over without the presence of a Master module. Thus, we went for using two HC-05 Modules instead, which can operate in either master or slave modes.
  
 The HC-05 modules were configured using AT commands to pair with each other and set a common UART baud rate. The baud rate used is 9600.
- 
+
+### Slave Configuration
+- AT+RMAAD  (Clear any paired devices)
+- AT+ROLE=0 (Set as slave)
+- AT+ADDR   (Get address of the HC-05 slave module to provide to the master)
+- AT+UART=9600,1,0 (Select a baud rate of 9600)
+
+### Master Configuration
+- AT+RMAAD (Clear any paired devices)
+- AT+ROLE=1 (Set as master)
+- AT+CMODE=0 (To connect the module to the specified Bluetooth address and this Bluetooth address can be specified by the binding command)
+- AT+BIND=xxxx,xx,xxxxxx (bind to the address of the slave module)
+- AT+UART=9600,1,0 (Select a baud rate of 9600)
+
 
  ![Bluetooth](Media/Bluetooth_config.png)
 
