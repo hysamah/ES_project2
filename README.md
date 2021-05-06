@@ -116,10 +116,30 @@ Inside this function, the data from the flex sensor is read. if the read value e
 For this side only the UART peripheral was used. UART1 is used in connection to the HC-05 bluetooth module, while UART2 is used to communicate motion values to the Pololu Motor controller. 
 
 #### UART1
-This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as it receives the motion values from the glove asynchronously. The procedure inside the UART handler is designed to be as small and efficient as possible to prevent UART Overrun errors. Only the data receiving is done inside the handler, while adjusting and sending the data is done inside the main loop. 
+This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as it receives the motion values from the glove asynchronously. The procedure inside the UART handler is designed to be as small and efficient as possible to prevent UART Overrun errors. Only the data receiving flag is raised inside the handler, while receiving, adjusting and sending the data is done inside the main loop. 
 
 #### UART2
 This UART is configured at Baud rate 19200 to send the motion bytes to the Pololu motor controller. Sending via this UART is done inside the main loop.
+
+```void USART1_IRQHandler(void)
+{
+	extern volatile int rec_flag;
+	rec_flag = 1;
+	__HAL_UART_DISABLE_IT(&huart1,UART_IT_RXNE);
+  HAL_UART_IRQHandler(&huart1);
+}```
+
+```
+__enable_irq();
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+  while (1)
+  {
+		if(rec_flag == 1)
+		{
+				receive_data();
+		}
+  }
+```
 
 # insert Interrupt handler code & main loop code
 
@@ -128,11 +148,11 @@ This side has two main drivers; `void dagu_digest(void)` and `void receive_data(
 
 `void receive_data(void)`
 
-This function is called inside the UART1 ISR to receive the motion data into a fixed size array. The `__HAL_UART_DISABLE_IT` is called before it to prevent ISR errors, then `__HAL_UART_ENABLE_IT` is called to re-enable the interrupt after the recieving is finished. Data alignment is settled inside the function.
+This function is called inside the main loop to receive the motion data into a fixed size array, it is called after the receiving flag is raised inside the UART ISR. The `__HAL_UART_DISABLE_IT` is called before it to prevent ISR errors, then `__HAL_UART_ENABLE_IT` is called to re-enable the interrupt after the recieving is finished. Data alignment is settled inside the function.
 
 `void dagu_digest(void)`
 
-This function is called inside the main loop after setting the sending flag. inside `dagu_digest` the received char values for the motion bytes are converted into intgers that are then sent to the Pololu via UART2.
+This function is called inside the `receive_data` function. inside `dagu_digest` the received char values for the motion bytes are converted into intgers that are then sent to the Pololu via UART2.
 
 ## Technical Challenges 
 
@@ -148,7 +168,7 @@ This function is called inside the main loop after setting the sending flag. ins
 - Completed & tested basic motion algorithm based on the sensors' data  
  
 ## First Demo Video
-[Hand Gesture Driven Dagu Demo](Media/Demo1.mp4) 
+![Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1osNEbPCETx6UBfbIYG2R1vcQnqG6cy6l/view?usp=sharing) 
 
 ## Next Phase Features
 
