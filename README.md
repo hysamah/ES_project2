@@ -89,7 +89,7 @@ Sent over this connection is the motion value to be communicated to the Pololu m
 
 The main driver function for the glove side is 
 `void command_dagu(void)` 
-Inside this function, the data from the flex sensor is read. if the read value exceeds the neutral threshold to indicate "neutral", it proceeds to send braking motion bytes to the Dagu. Otherwise, on receiving "bent" values the function proceeds to read values from the IMU sensor to check if the angels indicate forward motion or rotation. The speed values are made proportional to the IMU angel readings (Greater angel leads to higher speed in a certain direction) 
+Inside this function, the data from the flex sensor is read. if the read value exceeds the neutral threshold to indicate "neutral", it proceeds to send braking motion bytes to the Dagu. Otherwise, on receiving "bent" values the function proceeds to read values from the IMU sensor to check if the angles indicate forward motion or rotation. The speed values are made proportional to the IMU angle readings (Greater angle leads to higher speed in a certain direction) 
 
 ### Connections 
 ![glove_mx](Media/Glove_side_conn.jpg)
@@ -103,7 +103,7 @@ Inside this function, the data from the flex sensor is read. if the read value e
 For this side only the UART peripheral was used. UART1 is used in connection to the HC-05 bluetooth module, while UART2 is used to communicate motion values to the Pololu Motor controller. 
 
 #### UART1
-This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as it recieves the motion values from the glove asynchronously. The procedure inside the UART handler is designed to be as small and efficient as possible to prevent UART Overrun errors. Only the data recieving is done inside the handler, while adjusting and sending the data is done inside the main loop. 
+This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as it receives the motion values from the glove asynchronously. The procedure inside the UART handler is designed to be as small and efficient as possible to prevent UART Overrun errors. Only the data receiving is done inside the handler, while adjusting and sending the data is done inside the main loop. 
 
 #### UART2
 This UART is configured at Baud rate 19200 to send the motion bytes to the Pololu motor controller. Sending via this UART is done inside the main loop.
@@ -115,32 +115,41 @@ This side has two main drivers; `void dagu_digest(void)` and `void receive_data(
 
 `void receive_data(void)`
 
-This function is called inside the UART1 ISR to recieve the motion data into a fixed size array. The `__HAL_UART_DISABLE_IT` is called before it to prevent ISR errors, then `__HAL_UART_ENABLE_IT` is called to re-enable the interrupt after the recieving is finished. Data alignment is settled inside the function.
+This function is called inside the UART1 ISR to receive the motion data into a fixed size array. The `__HAL_UART_DISABLE_IT` is called before it to prevent ISR errors, then `__HAL_UART_ENABLE_IT` is called to re-enable the interrupt after the recieving is finished. Data alignment is settled inside the function.
 
 `void dagu_digest(void)`
 
-This function is called inside the main loop after setting the sending flag. inside `dagu_digest` the recieved char values for the motion bytes are converted into intgers that are then sent to the Pololu via UART2.
+This function is called inside the main loop after setting the sending flag. inside `dagu_digest` the received char values for the motion bytes are converted into intgers that are then sent to the Pololu via UART2.
 
 ## Technical Challenges 
 
 - HC-06 bluetooth modules we planned on using are slave-only modules
-- Figuring out the correct sending baud rate from the bluetooth moduels, as too high baudrates resulted in dropped data packets and UART overrun errors 
-- The master Bluetooth module only works with power supply from laptop so far, batteries and other power sources seem to stop bluetooth sending. However, the slave module on the Dagu recieves the data correctly using the Dagu's batteries
+- Figuring out the correct sending baud rate from the bluetooth modules, as too high baud rates resulted in dropped data packets and UART overrun errors 
+- The master Bluetooth module only works with power supply from laptop so far, batteries and other power sources seem to stop bluetooth sending. However, the slave module on the Dagu receives the data correctly using the Dagu's batteries
+ 
 
 
+## First Phase progress
+- Established valid communication over bluetooth between Glove & Dagu
+- Successfully reading & handling sensors' data
+- Completed & tested basic motion algorithm based on the sensors' data  
+ 
 ## First Demo Video
 [Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1rHvJYfV3ZO3Wg04cuTE-szriirWaFO4K/view?usp=sharing) //insert demo link
 
-
-## Potential enhancements 
+## Next Phase Features
 
 ### Automatic Replay/Repeat
 
-Using another gesture/button in order to record a sequence of movements of the kit and then replay these movements automatically on gesturing. 
+Using another gesture in order to record (sample) a sequence of movements of the kit and then replay these movements automatically on gesturing. 
 
-### Implementing a PID control loop
+### Prototyping
 
-The proportional–integral–derivative (PID) control loop will provide angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angel. It will also revert the Dagu into its original stance in case any obstacles try to divert it.   
+
+## Potential enhancements 
+ ### Implementing a PID control loop
+
+The proportional–integral–derivative (PID) control loop will provide angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It will also revert the Dagu into its original stance in case any obstacles try to divert it.   
 
 This will enhance Dagu stability and response accuracy to the gestures. In addition, it will eliminate the effect of external obstacles and diversions. 
 
