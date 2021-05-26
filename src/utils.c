@@ -3,7 +3,7 @@
 
 extern ADC_HandleTypeDef hadc1;
 
-uint16_t read_flex()
+uint16_t read_flex(void)
 {
 		uint16_t raw;
 
@@ -21,7 +21,3 @@ bno055_vector_t read_imu()
 	return c;
 }
 
-void send_motion_values(char * str)
-{
-		
-}
