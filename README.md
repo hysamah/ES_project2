@@ -211,6 +211,8 @@ We designed a glove equipped with the specified components to ease the control o
 
 The proportional–integral–derivative (PID) control loop provides angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It also reverts the Dagu into its original stance in case any obstacles try to divert it. This feature enhances Dagu stability and response accuracy to the gestures. In addition, it eliminates the effect of external obstacles and diversions. 
 
+[PID testing video](https://drive.google.com/file/d/1CtImdR_Wf__q-Uk0UDSUjgjJfLXppL2T/view?usp=sharing)
+
 ## limitations of the project
 
 - Limited range of the Bluetooth communication modules, the kit has to be operated in close-range
