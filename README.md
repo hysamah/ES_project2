@@ -211,7 +211,13 @@ We designed a glove equipped with the specified components to ease the control o
 
 The proportional–integral–derivative (PID) control loop provides angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It also reverts the Dagu into its original stance in case any obstacles try to divert it. This feature enhances Dagu stability and response accuracy to the gestures. In addition, it eliminates the effect of external obstacles and diversions. 
 
+#### No Communication PD Control
+We already implemented a porportional-derivative feedback loop using this [library](https://github.com/tcleg/PID_Controller). To test our implementation, we hardcoded a set point for the Yaw angle (starting angle), and our PD controller tries to push the dagu to return to the set point as shown in the next video:   
+
 [PID testing video](https://drive.google.com/file/d/1CtImdR_Wf__q-Uk0UDSUjgjJfLXppL2T/view?usp=sharing)
+
+#### Variable Set-Point Communication based PD Control
+This feature is a future development that we plan to implement. The set point of the controller could be variated when we perform a rotation from the glove side for the final rest angle to be our new set point. This new set-point will be used by the PD controller to super impose a speed value on the motor values sent from the glove on forward motion to counter act the small variations in angles that might happen due to the different physical circumstances that might face the dagu, for instance one side of the dagu has weaker motors than the other side.    
 
 ## limitations of the project
 
