@@ -78,19 +78,15 @@ The HC-05 modules were configured using AT commands to pair with each other and 
 
 ## Glove Controller Side
 
-![glove_mx](Media/glove_cubeMX.jpeg)
+![glove_mx](Media/glove_side_MX.png)
 ### Implementation Specs
 
-For this side we used 3 different peripherals of the MCU; ADC, UART, and I2C, to interface with different sensors. 
+For this side we used 4 different peripherals of the MCU; ADC, UART, I2C, and GPIO to interface with different sensors. 
 #### ADC
 ADC1 peripheral is used to get readings from the flex sensor. The flex sensor acts like a variable resistor whose resistance changes by flexing it. It produces analog readings within a certain voltage that are handled by the ADC. Bending the sensor in different directions has a different effect on the value read from the ADC output. One direction increases the readings while the other reduces them significantly. After connecting the sensor we tested it in different voltage divider circuits until we tuned the sensor values to certain thresholds at bent and neutral positions. 
 
 ![Flex](Media/Flex_sensor_connections.jpg)
 
-#### I2C 
-I2C3 peripheral is used to interface with the BNO055 IMU sensor. This sensor produces angular values for its current orientation in 3 directions. We used Two of the given reading values for our purpose; the Pitch and Roll. 
-The BNO055 sensor has on-board DSP chip, so it sends over the I2C connection the accurate digital values of the current orientation. 
-For interfacing with the sensor we used [bno055_stm32-master](https://github.com/ivyknob/bno055_stm32) Library which is built on top of [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) specifically for the STM32 MCUs. 
 
 #### UART 
 UART1 is used in connection with the Bluetooth module in order to send the motion values over UART to the Dagu 4WD. The used Baud rate for this communication is 9600. 
@@ -100,17 +96,45 @@ Sent over this connection is the motion value to be communicated to the Pololu m
 ![Flex](Media/UART_msg.png)
 
 
+#### I2C 
+I2C3 peripheral is used to interface with the BNO055 IMU sensor. This sensor produces angular values for its current orientation in 3 directions. We used Two of the given reading values for our purpose; the Pitch and Roll. 
+The BNO055 sensor has on-board DSP chip, so it sends over the I2C connection the accurate digital values of the current orientation. 
+For interfacing with the sensor we used [bno055_stm32-master](https://github.com/ivyknob/bno055_stm32) Library which is built on top of [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) specifically for the STM32 MCUs. 
+
+
+### GPIO
+
+Two pins from GPIOB are used to implement the record replay buttons. GPIOB Pin 3 is used to record the gestures of the glove using the funciton `start_recording(void)` and GPIOB pin 1 is user to replay the recorded gestures from the glove using the funciton `replay_recorded()`. 
+
 ### API Details
 
 The main driver function for the glove side is 
 `void command_dagu(void)` 
 Inside this function, the data from the flex sensor is read. if the read value exceeds the neutral threshold to indicate "neutral", it proceeds to send braking motion bytes to the Dagu. Otherwise, on receiving "bent" values the function proceeds to read values from the IMU sensor to check if the angles indicate forward motion or rotation. The speed values are made proportional to the IMU angle readings (Greater angle leads to higher speed in a certain direction) 
 
-### GPIO
-Two pins from GPIOB are used to implement the record replay buttons. GPIOB Pin 3 is used to record the gestures of the glove using the funciton `start_recording(void)` and GPIOB pin 1 is user to replay the recorded gestures from the glove using the funciton `replay_recorded()`. 
+### Glove Systick Handler
+we modified the systec handler so that we can set a counter for taking samples per suitable time.
+
+```
+void SysTick_Handler(void)
+{
+  /* USER CODE BEGIN SysTick_IRQn 0 */
+	extern int  sample_counter;
+	sample_counter++;
+
+  /* USER CODE END SysTick_IRQn 0 */
+  HAL_IncTick();
+  /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* USER CODE END SysTick_IRQn 1 */
+}
+
+```
 
 ### Connections 
-![glove_mx](Media/Glove_side_conn.jpg)
+
+![glove connections](Media/Glove_side_conn.jpg)
+![glove_mx](Media/golve_connections.png)
 
 ## Dagu 4WD Side
 
@@ -118,7 +142,7 @@ Two pins from GPIOB are used to implement the record replay buttons. GPIOB Pin 3
 
 ### Implementation Specs
 
-For this side only the UART peripheral was used. UART1 is used in connection to the HC-05 bluetooth module, while UART2 is used to communicate motion values to the Pololu Motor controller. 
+For this side, we used the UART peripheral and I2C3. UART1 is used in connection to the HC-05 bluetooth module, while UART2 is used to communicate motion values to the Pololu Motor controller. In addition, the IMU is connected to I2C3 to implement the PID control loop.
 
 #### UART1
 This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as it receives the motion values from the glove asynchronously. The procedure inside the UART handler is designed to be as small and efficient as possible to prevent UART Overrun errors. Only the data receiving flag is raised inside the handler, while receiving, adjusting and sending the data is done inside the main loop. 
@@ -160,42 +184,32 @@ This function is called inside the main loop to receive the motion data into a f
 
 This function is called inside the `receive_data` function. inside `dagu_digest` the received char values for the motion bytes are converted into intgers that are then sent to the Pololu via UART2.
 
-## Technical Challenges 
-
-- HC-06 bluetooth modules we planned on using are slave-only modules
-- Figuring out the correct sending baud rate from the bluetooth modules, as too high baud rates resulted in dropped data packets and UART overrun errors 
-- The master Bluetooth module only works with power supply from laptop so far, batteries and other power sources seem to stop bluetooth sending. However, the slave module on the Dagu receives the data correctly using the Dagu's batteries
  
-
-
-## First Phase progress
-- Established valid communication over bluetooth between Glove & Dagu
-- Successfully reading & handling sensors' data
-- Completed & tested basic motion algorithm based on the sensors' data  
- 
-## First Demo Video
+## Basic Hand-Gestures video:
 [Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1osNEbPCETx6UBfbIYG2R1vcQnqG6cy6l/view?usp=sharing) 
 
-## Second Phase progress
+## Other Features
 
 ### Automatic Replay/Repeat
 Using two buttons, the record button is used to record the hand-gestures as it records (sample) a sequence of movements of the kit for a specific time duration and then replay these movements automatically when pressing the replay button. to implement this, `void start_recording()` and `void play_recorded()` functions were implemented. On pressing GPIOB Pin 3, the function `start_recording()` is called and the movements are saved inside an array. On pressing GPIOB Pin 1, the function `play_recorded()` is called and the sequence of movements are played from the recorded array and it keeps repeating the sequence of monvments untill the replay button is released. 
 
-### Implementing a PID control loop
+### PID control loop
 
 The proportional–integral–derivative (PID) control loop provides angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It also reverts the Dagu into its original stance in case any obstacles try to divert it. This feature enhances Dagu stability and response accuracy to the gestures. In addition, it eliminates the effect of external obstacles and diversions.
 
-### Prototyping
+### Glove prototyping
 We designed a glove equipped with the specified components to ease the control of the dagu
 
+![glove_mx](Media/golve_prototype.jpeg)
 
-## limitations
+## Final Hand-Gestures video:
+[Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1Cj_-AGyR_HFJMkBtRRDh9JXT5KEECCbx/view?usp=drivesdk)
+
+## limitations of the project
 
 - Limited range of the Bluetooth communication modules, the kit has to be operated in close-range
 
 - No encoders on the Dagu motors, this makes re-mapping or automation inaccurate
-
-- No optimized or stable glove with allocated space for the components
 
 - Limited memory size which limits the duration of recording the gestures.
 
