@@ -7,14 +7,16 @@ Replicating human movements is highly desired in many applications, for instance
 ## Project Idea
 
 
-Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors and an embedded MCU. We use a mixture of flex sensors and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communicates  the desired car movements to another Nucleo-32 board in the Dagu kit using a bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction.
+Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors, buttons and an embedded MCU. We use a mixture of flex sensor and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We also used 2 button for the record and replay features. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communicates  the desired car movements to another Nucleo-32 board in the Dagu kit using a bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction. We also implemented a PID control loop using another IMU in the Dagu kit to enhance Dagu stability and response accuracy to the gestures.
 
-Our project has 5 basic gestures:
+Our project has 7 basic gestures:
 -  open palm for stopping/braking 
 -  closed fist + downwards rotate (pitch angle) for forward
 -  closed fist + upwards rotate (pitch angle) for reverse
 -  closed fist + left rotate (roll angle) for left
 -  closed fist + right rotate (roll angle) for right
+-  record button to record the gestures
+-  replay button to play the recorded gestures.
 
 
 
@@ -76,7 +78,7 @@ The HC-05 modules were configured using AT commands to pair with each other and 
 
 ## Glove Controller Side
 
-![glove_mx](Media/Glove_side_mx.jpg)
+![glove_mx](Media/glove_cubeMX.jpeg)
 ### Implementation Specs
 
 For this side we used 3 different peripherals of the MCU; ADC, UART, and I2C, to interface with different sensors. 
@@ -104,12 +106,15 @@ The main driver function for the glove side is
 `void command_dagu(void)` 
 Inside this function, the data from the flex sensor is read. if the read value exceeds the neutral threshold to indicate "neutral", it proceeds to send braking motion bytes to the Dagu. Otherwise, on receiving "bent" values the function proceeds to read values from the IMU sensor to check if the angles indicate forward motion or rotation. The speed values are made proportional to the IMU angle readings (Greater angle leads to higher speed in a certain direction) 
 
+### GPIO
+Two pins from GPIOB are used to implement the record replay buttons. GPIOB Pin 3 is used to record the gestures of the glove using the funciton `start_recording(void)` and GPIOB pin 1 is user to replay the recorded gestures from the glove using the funciton `replay_recorded()`. 
+
 ### Connections 
 ![glove_mx](Media/Glove_side_conn.jpg)
 
 ## Dagu 4WD Side
 
-![dagu_mx](Media/Dagu_side_mx.jpg)
+![dagu_mx](Media/Dagu_cubeMX.jpeg)
 
 ### Implementation Specs
 
@@ -171,23 +176,17 @@ This function is called inside the `receive_data` function. inside `dagu_digest`
 ## First Demo Video
 [Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1osNEbPCETx6UBfbIYG2R1vcQnqG6cy6l/view?usp=sharing) 
 
-## Next Phase Features
+## Second Phase progress
 
 ### Automatic Replay/Repeat
+Using two buttons, the record button is used to record the hand-gestures as it records (sample) a sequence of movements of the kit for a specific time duration and then replay these movements automatically when pressing the replay button. to implement this, `void start_recording()` and `void play_recorded()` functions were implemented. On pressing GPIOB Pin 3, the function `start_recording()` is called and the movements are saved inside an array. On pressing GPIOB Pin 1, the function `play_recorded()` is called and the sequence of movements are played from the recorded array and it keeps repeating the sequence of monvments untill the replay button is released. 
 
-Using another gesture in order to record (sample) a sequence of movements of the kit and then replay these movements automatically on gesturing. 
+### Implementing a PID control loop
+
+The proportional–integral–derivative (PID) control loop provides angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It also reverts the Dagu into its original stance in case any obstacles try to divert it. This feature enhances Dagu stability and response accuracy to the gestures. In addition, it eliminates the effect of external obstacles and diversions.
 
 ### Prototyping
-designing a glove equipped with the specified components to ease the control of the dagu
-
-## Potential enhancements 
- ### Implementing a PID control loop
-
-The proportional–integral–derivative (PID) control loop will provide angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It will also revert the Dagu into its original stance in case any obstacles try to divert it.   
-
-This will enhance Dagu stability and response accuracy to the gestures. In addition, it will eliminate the effect of external obstacles and diversions. 
-
-
+We designed a glove equipped with the specified components to ease the control of the dagu
 
 
 ## limitations
@@ -197,6 +196,8 @@ This will enhance Dagu stability and response accuracy to the gestures. In addit
 - No encoders on the Dagu motors, this makes re-mapping or automation inaccurate
 
 - No optimized or stable glove with allocated space for the components
+
+- Limited memory size which limits the duration of recording the gestures.
 
 
 
