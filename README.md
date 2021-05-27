@@ -196,10 +196,6 @@ This function is called inside the `receive_data` function. inside `dagu_digest`
 ### Automatic Replay/Repeat
 Using two buttons, the record button is used to record the hand gestures as it records (sample) a sequence of movements of the kit for specific time duration and then replay these movements automatically when pressing the replay button. to implement this, `void start_recording()` and `void play_recorded()` functions were implemented. On pressing GPIOB Pin 3, the function `start_recording()` is called and the movements are saved inside an array. On pressing GPIOB Pin 1, the function `play_recorded()` is called and the sequence of movements are played from the recorded array and it keeps repeating the sequence of movements until the replay button is released. 
 
-### PID control loop
-
-The proportional–integral–derivative (PID) control loop provides angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It also reverts the Dagu into its original stance in case any obstacles try to divert it. This feature enhances Dagu stability and response accuracy to the gestures. In addition, it eliminates the effect of external obstacles and diversions.
-
 ### Glove prototyping
 We designed a glove equipped with the specified components to ease the control of the dagu
 
@@ -207,6 +203,13 @@ We designed a glove equipped with the specified components to ease the control o
 
 ## Final Hand-Gestures video:
 [Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1Cj_-AGyR_HFJMkBtRRDh9JXT5KEECCbx/view?usp=drivesdk)
+
+## Future Work:
+ We are planing to continue working on this project and we already started working on some additional features that will enhance the accuracy and effeciency.
+ 
+### Implementing a PID control loop
+
+The proportional–integral–derivative (PID) control loop provides angular feedback to the on-ground MCU in order to adjust the movement of the Dagu to specifically the desired angle. It also reverts the Dagu into its original stance in case any obstacles try to divert it. This feature enhances Dagu stability and response accuracy to the gestures. In addition, it eliminates the effect of external obstacles and diversions. 
 
 ## limitations of the project
 
