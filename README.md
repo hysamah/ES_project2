@@ -1,4 +1,7 @@
-# ES_project2
+## Authors
+- Samah Hussein - 900172660
+- Eman Darwish  - 900172070
+- Mohamed Shahawy - 900172170
 
 ## Project Motivation
 
@@ -7,15 +10,15 @@ Replicating human movements is highly desired in many applications, for instance
 ## Project Idea
 
 
-Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors, buttons and an embedded MCU. We use a mixture of flex sensor and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We also used 2 button for the record and replay features. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communicates  the desired car movements to another Nucleo-32 board in the Dagu kit using a bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction. We also implemented a PID control loop using another IMU in the Dagu kit to enhance Dagu stability and response accuracy to the gestures.
+Our project aims at utilizing hand gestures for control. We will be controlling a car kit (Dagu 4WD) using a glove that has sensors, buttons, and an embedded MCU. We use a mixture of flex sensors and an Inertial measurement unit (IMU) inside the glove to determine the hand movement. We also use two buttons for the record and replay features. We use the STM32 Nucleo board to interact with the sensors. Moreover, it communicates the desired car movements to another Nucleo-32 board in the Dagu kit using a Bluetooth module via UART. The on-ground Nucleo-32 will signal the Pololu motor controller to move the Dagu in the correct direction. We also added a PID control loop using another IMU in the Dagu kit to enhance Dagu stability and response accuracy to the gestures.
 
-Our project has 7 basic gestures:
+Our project has 7 basic gestures and features:
 -  open palm for stopping/braking 
 -  closed fist + downwards rotate (pitch angle) for forward
 -  closed fist + upwards rotate (pitch angle) for reverse
 -  closed fist + left rotate (roll angle) for left
 -  closed fist + right rotate (roll angle) for right
--  record button to record the gestures
+-  record button to record the gestures while moving.
 -  replay button to play the recorded gestures.
 
 
@@ -50,7 +53,7 @@ Keil uVision 5
 STM 32 Cube programmer 
 
 ## Used Architecture
-![Getting Started](Media/ES_P2_Architecture.jpg)
+![Getting Started](https://github.com/hysamah/ES_project2/blob/main/Media/ES_P2_Architecture.jpg)
 
 
 ## Interfacing with the Bluetooth module
@@ -73,19 +76,19 @@ The HC-05 modules were configured using AT commands to pair with each other and 
 - AT+UART=9600,1,0 (Select a baud rate of 9600)
 
 
- ![Bluetooth](Media/Bluetooth_config.png)
+ ![Bluetooth](https://github.com/hysamah/ES_project2/blob/main/Media/Bluetooth_config.png)
 
 
 ## Glove Controller Side
 
-![glove_mx](Media/glove_side_MX.png)
+![glove_mx](https://github.com/hysamah/ES_project2/blob/main/Media/glove_side_MX.png)
 ### Implementation Specs
 
 For this side we used 4 different peripherals of the MCU; ADC, UART, I2C, and GPIO to interface with different sensors. 
 #### ADC
 ADC1 peripheral is used to get readings from the flex sensor. The flex sensor acts like a variable resistor whose resistance changes by flexing it. It produces analog readings within a certain voltage that are handled by the ADC. Bending the sensor in different directions has a different effect on the value read from the ADC output. One direction increases the readings while the other reduces them significantly. After connecting the sensor we tested it in different voltage divider circuits until we tuned the sensor values to certain thresholds at bent and neutral positions. 
 
-![Flex](Media/Flex_sensor_connections.jpg)
+![Flex](https://github.com/hysamah/ES_project2/blob/main/Media/Flex_sensor_connections.jpg)
 
 
 #### UART 
@@ -93,18 +96,18 @@ UART1 is used in connection with the Bluetooth module in order to send the motio
 Sent over this connection is the motion value to be communicated to the Pololu motor controller. These motion values are encoded into a fixed size message which is the string values of the motion bytes. An alignment byte is sent at the beginning of the message such that the receiver can aim to receive the complete message from start to end.
   
 
-![Flex](Media/UART_msg.png)
+![Flex](https://github.com/hysamah/ES_project2/blob/main/Media/UART_msg.png)
 
 
 #### I2C 
 I2C3 peripheral is used to interface with the BNO055 IMU sensor. This sensor produces angular values for its current orientation in 3 directions. We used Two of the given reading values for our purpose; the Pitch and Roll. 
-The BNO055 sensor has on-board DSP chip, so it sends over the I2C connection the accurate digital values of the current orientation. 
-For interfacing with the sensor we used [bno055_stm32-master](https://github.com/ivyknob/bno055_stm32) Library which is built on top of [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) specifically for the STM32 MCUs. 
+The BNO055 sensor has an on-board DSP chip, so it sends over the I2C connection the accurate digital values of the current orientation. 
+For interfacing with the sensor, we used [bno055_stm32-master](https://github.com/ivyknob/bno055_stm32) Library which is built on top of [BNO055 standard APIs library](https://github.com/BoschSensortec/BNO055_driver) specifically for the STM32 MCUs. 
 
 
 ### GPIO
 
-Two pins from GPIOB are used to implement the record replay buttons. GPIOB Pin 3 is used to record the gestures of the glove using the funciton `start_recording(void)` and GPIOB pin 1 is user to replay the recorded gestures from the glove using the funciton `replay_recorded()`. 
+Two pins from GPIOB are used to implement the record replay buttons. GPIOB Pin 3 is used to record the gestures of the glove using the function `start_recording(void)` and GPIOB pin 1 is used to replay the recorded gestures from the glove using the function `replay_recorded()`. 
 
 ### API Details
 
@@ -113,7 +116,7 @@ The main driver function for the glove side is
 Inside this function, the data from the flex sensor is read. if the read value exceeds the neutral threshold to indicate "neutral", it proceeds to send braking motion bytes to the Dagu. Otherwise, on receiving "bent" values the function proceeds to read values from the IMU sensor to check if the angles indicate forward motion or rotation. The speed values are made proportional to the IMU angle readings (Greater angle leads to higher speed in a certain direction) 
 
 ### Glove Systick Handler
-we modified the systec handler so that we can set a counter for taking samples per suitable time.
+we modified the SysTick Handler so that we can set a counter for taking samples per suitable time.
 
 ```
 void SysTick_Handler(void)
@@ -133,16 +136,16 @@ void SysTick_Handler(void)
 
 ### Connections 
 
-![glove connections](Media/Glove_side_conn.jpg)
-![glove_mx](Media/golve_connections.png)
+![glove connections](https://github.com/hysamah/ES_project2/blob/main/Media/Glove_side_conn.jpg)
+![glove_mx](https://github.com/hysamah/ES_project2/blob/main/Media/golve_connections.png)
 
 ## Dagu 4WD Side
 
-![dagu_mx](Media/Dagu_cubeMX.jpeg)
+![dagu_mx](https://github.com/hysamah/ES_project2/blob/main/Media/Dagu_cubeMX.jpeg)
 
 ### Implementation Specs
 
-For this side, we used the UART peripheral and I2C3. UART1 is used in connection to the HC-05 bluetooth module, while UART2 is used to communicate motion values to the Pololu Motor controller. In addition, the IMU is connected to I2C3 to implement the PID control loop.
+For this side, we used the UART peripheral and I2C3. UART1 is used in connection to the HC-05 Bluetooth module, while UART2 is used to communicate motion values to the Pololu Motor controller. In addition, the IMU is connected to I2C3 to implement the PID control loop.
 
 #### UART1
 This UART is configured at baud rate 9600. The UART1 Interrupts are enabled as it receives the motion values from the glove asynchronously. The procedure inside the UART handler is designed to be as small and efficient as possible to prevent UART Overrun errors. Only the data receiving flag is raised inside the handler, while receiving, adjusting and sending the data is done inside the main loop. 
@@ -178,11 +181,11 @@ This side has two main drivers; `void dagu_digest(void)` and `void receive_data(
 
 `void receive_data(void)`
 
-This function is called inside the main loop to receive the motion data into a fixed size array, it is called after the receiving flag is raised inside the UART ISR. The `__HAL_UART_DISABLE_IT` is called before it to prevent ISR errors, then `__HAL_UART_ENABLE_IT` is called to re-enable the interrupt after the recieving is finished. Data alignment is settled inside the function.
+This function is called inside the main loop to receive the motion data into a fixed-size array, it is called after the receiving flag is raised inside the UART ISR. The `__HAL_UART_DISABLE_IT` is called before it to prevent ISR errors, then `__HAL_UART_ENABLE_IT` is called to re-enable the interrupt after the receiving is finished. Data alignment is settled inside the function.
 
 `void dagu_digest(void)`
 
-This function is called inside the `receive_data` function. inside `dagu_digest` the received char values for the motion bytes are converted into intgers that are then sent to the Pololu via UART2.
+This function is called inside the `receive_data` function. inside `dagu_digest` the received char values for the motion bytes are converted into integers that are then sent to the Pololu via UART2.
 
  
 ## Basic Hand-Gestures video:
@@ -191,7 +194,7 @@ This function is called inside the `receive_data` function. inside `dagu_digest`
 ## Other Features
 
 ### Automatic Replay/Repeat
-Using two buttons, the record button is used to record the hand-gestures as it records (sample) a sequence of movements of the kit for a specific time duration and then replay these movements automatically when pressing the replay button. to implement this, `void start_recording()` and `void play_recorded()` functions were implemented. On pressing GPIOB Pin 3, the function `start_recording()` is called and the movements are saved inside an array. On pressing GPIOB Pin 1, the function `play_recorded()` is called and the sequence of movements are played from the recorded array and it keeps repeating the sequence of monvments untill the replay button is released. 
+Using two buttons, the record button is used to record the hand gestures as it records (sample) a sequence of movements of the kit for specific time duration and then replay these movements automatically when pressing the replay button. to implement this, `void start_recording()` and `void play_recorded()` functions were implemented. On pressing GPIOB Pin 3, the function `start_recording()` is called and the movements are saved inside an array. On pressing GPIOB Pin 1, the function `play_recorded()` is called and the sequence of movements are played from the recorded array and it keeps repeating the sequence of movements until the replay button is released. 
 
 ### PID control loop
 
@@ -200,7 +203,7 @@ The proportional–integral–derivative (PID) control loop provides angular fee
 ### Glove prototyping
 We designed a glove equipped with the specified components to ease the control of the dagu
 
-![glove_mx](Media/golve_prototype.jpeg)
+![glove_mx](https://github.com/hysamah/ES_project2/blob/main/Media/golve_prototype.jpeg)
 
 ## Final Hand-Gestures video:
 [Hand Gesture Driven Dagu Demo](https://drive.google.com/file/d/1Cj_-AGyR_HFJMkBtRRDh9JXT5KEECCbx/view?usp=drivesdk)
@@ -212,6 +215,4 @@ We designed a glove equipped with the specified components to ease the control o
 - No encoders on the Dagu motors, this makes re-mapping or automation inaccurate
 
 - Limited memory size which limits the duration of recording the gestures.
-
-
 
